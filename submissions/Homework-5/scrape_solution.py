@@ -124,8 +124,8 @@ def get_hotel_info_page(hotel_name, page_url, datadir='data/'):
     html = response.text.encode('utf-8')
     hotel_name = hotel_name.replace(' ', '-').replace('/','').strip()
     # Save the webpage
-    with open(os.path.join(datadir, hotel_name + '.html'), "w") as h:
-        h.write(html)
+    # with open(os.path.join(datadir, hotel_name + '.html'), "w") as h:
+    #     h.write(html)
     return html
 
 def get_hotel_info(html):
@@ -199,29 +199,29 @@ def parse_hotellist_page(html):
     # Extract hotel name, star rating and number of reviews
     hotel_boxes = soup.findAll('div', {'class' :'listing wrap reasoning_v5_wrap jfy_listing p13n_imperfect'})
     if not hotel_boxes:
-        log.info("#################################### Option 2 ######################################")
+        #log.info("#################################### Option 2 ######################################")
         hotel_boxes = soup.findAll('div', {'class' :'listing_info jfy'})
     if not hotel_boxes:
-        log.info("#################################### Option 3 ######################################")
+        #log.info("#################################### Option 3 ######################################")
         hotel_boxes = soup.findAll('div', {'class' :'listing easyClear  p13n_imperfect'})
 
     for hotel_box in hotel_boxes:
         hotel_name_url = hotel_box.find("a", {"target" : "_blank"})
         hotel_name = hotel_name_url.find(text=True).strip()
         hotel_url = hotel_name_url['href'].strip()
-        log.info("Hotel name: %s" % hotel_name.strip())
+        #log.info("Hotel name: %s" % hotel_name.strip())
 
         stars = hotel_box.find("img", {"class" : "sprite-ratings"})
         if stars:
             stars = float(stars['alt'].split()[0])
-            log.info("Stars: %s" % stars)
+            #log.info("Stars: %s" % stars)
 
         num_reviews = hotel_box.find("span", {'class': "more"}).findAll(text=True)
         if num_reviews:
             num_reviews = float([x for x in num_reviews if "review" in x][0].strip().split()[0].replace(',', ''))
-            log.info("Number of reviews: %s " % num_reviews)
+            #log.info("Number of reviews: %s " % num_reviews)
 
-        log.info("Hotel url: %s" % hotel_url)
+        #log.info("Hotel url: %s" % hotel_url)
 
 
         newest_hotel = [hotel_name, hotel_url, stars, num_reviews]
@@ -231,7 +231,8 @@ def parse_hotellist_page(html):
     div = soup.find("div", {"class" : "pgLinks"})
     # check if this is the last page
     if div.find('span', {'class' : 'guiArw pageEndNext'}):
-        log.info("We reached last page")
+        #log.info("We reached last page")
+        print "We reached last page"
         return (None, new_hotels)
     else:
         # If not, return the url to the next page
@@ -240,7 +241,7 @@ def parse_hotellist_page(html):
         # for href in hrefs:
         #     if 'guiArw sprite-pageNext ' in href:
         #         print 'Found'
-        log.info("Next url is %s" % hrefs[0]['href'])
+        #log.info("Next url is %s" % hrefs[0]['href'])
         return (hrefs[0]['href'], new_hotels)
 
 
