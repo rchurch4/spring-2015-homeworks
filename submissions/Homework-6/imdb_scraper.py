@@ -131,17 +131,20 @@ def parse_movie_page(link):
 	html = get_movie_page(movie_id)
 	soup = BeautifulSoup(html)
 	overview = soup.find('div', {'class':'article title-overview'})
-	title_area = overview.find('h1', {'class':'header'})
-	title = regex.sub('',title_area.find('span', {'itemprop':'name'}).find(text=True))
-	year = regex.sub('',title_area.find('span', {'class':'nobr'}).find('a', href=True).find(text=True))
+	if overview != None:
+		title_area = overview.find('h1', {'class':'header'})
+		title = regex.sub('',title_area.find('span', {'itemprop':'name'}).find(text=True))
+		year = regex.sub('',title_area.find('span', {'class':'nobr'}).find('a', href=True).find(text=True))
 
-	rating_area = overview.find('div', {'class':'star-box giga-star'})
-	rating = rating_area.find('div', {'class':'star-box-details'}).find('span', {'itemprop':'ratingValue'}).find(text=True)
-	#hardcode url for cast and box office info
-	budget, revenue = parse_business_page(movie_id)
-	cast = parse_cast_page(movie_id)
-	movie = (movie_id, title, year, rating, budget, revenue, revenue-budget, cast)
-	return movie
+		rating_area = overview.find('div', {'class':'star-box giga-star'})
+		rating = rating_area.find('div', {'class':'star-box-details'}).find('span', {'itemprop':'ratingValue'}).find(text=True)
+		#hardcode url for cast and box office info
+		budget, revenue = parse_business_page(movie_id)
+		cast = parse_cast_page(movie_id)
+		movie = (movie_id, title, year, rating, budget, revenue, revenue-budget, cast)
+		return movie
+	else:
+		return None
 # END INDIVIDUAL MOVIE SCRAPING
 
 def parse_imdb(start_year, end_year, datadir, first_stage_complete, second_stage_complete):
@@ -190,7 +193,6 @@ def parse_imdb(start_year, end_year, datadir, first_stage_complete, second_stage
 				h.write('\n')
 	else:
 		with open(os.path.join(datadir, 'movie_info.csv'), "r") as h:
-			print 'Getting info from file'
 			for u in h:
 				next_movie = []
 				cast_list = []
@@ -199,10 +201,12 @@ def parse_imdb(start_year, end_year, datadir, first_stage_complete, second_stage
 					if i < 7:
 						next_movie.append(movie_stuff[i])
 					else:
-						name = movie_stuff[i].replace('u\'', '').replace('\'','').replace('[','').replace(']','').replace('\\n','').rstrip().lstrip()
-						if len(name) > 1:
-							cast_list.append(name)
+						name = movie_stuff[i].replace('u\'', '').replace('\'','').replace('[','').replace('\\n','').replace(']','').lstrip().rstrip()
+						cast_list.append(name)
 				cast_list = set(cast_list)
+				cast_list = list(cast_list)
 				next_movie.append(cast_list)
 				movie_info.append(next_movie)
 	return movie_info
+
+#parse_imdb(start_year, end_year, datadir, first_stage_complete, second_stage_complete)
